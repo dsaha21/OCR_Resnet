@@ -9,17 +9,17 @@ import argparse
 import imutils
 import cv2
 
-# construct the argument parser and parse the arguments
+
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--image", required=True,
 	help="path to input image")
-ap.add_argument("-m", "--model", type=str, required=True,
-	help="path to trained handwriting recognition model")
+# ap.add_argument("-m", "--model", type=str, required=True,
+# 	help="path to trained handwriting recognition model")
 args = vars(ap.parse_args())
 
 # load the handwriting OCR model
 print("[INFO] loading handwriting OCR model...")
-model = load_model(args["model"])
+model = load_model("model/OCRnet.h5") #load_model(args["model"])
 
 # load the input image from disk, convert it to grayscale, and blur
 # it to reduce noise
@@ -38,8 +38,8 @@ cnts = sort_contours(cnts, method="left-to-right")[0]
 # initialize the list of contour bounding boxes and associated
 # characters that we'll be OCR'ing
 chars = []
+size = 28
 
-# loop over the contours
 for c in cnts:
 	# compute the bounding box of the contour
 	(x, y, w, h) = cv2.boundingRect(c)
@@ -58,24 +58,24 @@ for c in cnts:
 		# if the width is greater than the height, resize along the
 		# width dimension
 		if tW > tH:
-			thresh = imutils.resize(thresh, width=32)
+			thresh = imutils.resize(thresh, width=size) # 32->28
 
 		# otherwise, resize along the height
 		else:
-			thresh = imutils.resize(thresh, height=32)
+			thresh = imutils.resize(thresh, height=size)
 
 		# re-grab the image dimensions (now that its been resized)
 		# and then determine how much we need to pad the width and
 		# height such that our image will be 32x32
 		(tH, tW) = thresh.shape
-		dX = int(max(0, 32 - tW) / 2.0)
-		dY = int(max(0, 32 - tH) / 2.0)
+		dX = int(max(0, size - tW) / 2.0)
+		dY = int(max(0, size - tH) / 2.0)
 
 		# pad the image and force 32x32 dimensions
 		padded = cv2.copyMakeBorder(thresh, top=dY, bottom=dY,
 			left=dX, right=dX, borderType=cv2.BORDER_CONSTANT,
 			value=(0, 0, 0))
-		padded = cv2.resize(padded, (32, 32))
+		padded = cv2.resize(padded, (size, size))
 
 		# prepare the padded image for classification via our
 		# handwriting OCR model
