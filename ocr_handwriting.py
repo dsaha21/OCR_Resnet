@@ -13,13 +13,16 @@ import cv2
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--image", required=True,
 	help="path to input image")
-# ap.add_argument("-m", "--model", type=str, required=True,
-# 	help="path to trained handwriting recognition model")
+ap.add_argument("-m", "--model", type=str, required=True,
+	help="path to trained handwriting recognition model")
 args = vars(ap.parse_args())
 
 # load the handwriting OCR model
 print("[INFO] loading handwriting OCR model...")
-model = load_model("model/OCRnet.h5") #load_model(args["model"])
+if args["model"]:
+	model = load_model(args["model"])
+else:
+	model = load_model("model/OCRnet.h5") 
 
 # load the input image from disk, convert it to grayscale, and blur
 # it to reduce noise
